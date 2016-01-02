@@ -1,0 +1,28 @@
+{
+  "name": "odataserver2",
+  "version": "0.0.1",
+  "description": "OData server on top of MySQL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/gizur/odataserver2.git"
+  },
+  "keywords": [
+    "Odata",
+    "MySQL"
+  ],
+  "author": "Jonas Colmsjö",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gizur/odataserver2/issues"
+  },
+  "homepage": "https://github.com/gizur/odataserver2#readme",
+  "dependencies": {
+    "mysqlstream": "*",
+    "od2mysql": "*",
+    "odparser": "*"
+  }
+}
