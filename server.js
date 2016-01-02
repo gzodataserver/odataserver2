@@ -7,7 +7,8 @@ var OdParser = require('odparser').OdParser;
 var Update = require('odparser').json2sql.Update;
 var Insert = require('odparser').json2sql.Insert;
 
-var tosql = require('od2tosql.js');
+var tosql = require('od2mysql');
+var MysqlStream = require('mysqlstream');
 
 // Setup logging
 // =============
@@ -22,18 +23,79 @@ var error = console.error.bind(console);
 
 var server = http.Server();
 
-server.on('request', function(req, res) {
-  req.on('close', function(){console.log('close in request')});
-  res.on('finish', function(){console.log('finish in response')});
+server.on('request', function (req, res) {
+  var contentLength = parseInt(req.headers['content-length']);
+  log('processing request: ', req.url, ' content length: ' + contentLength);
 
-  console.log('processing request: ', req.url);
   var ast = new OdParser().parseReq(req);
-  var sql = tosql(ast);
-  res.write(JSON.stringify(ast));
-  
-  if (ast.queryType === 'insert' && !ast.bucket_op) req.pipe(new Insert(null, ast.schema, ast.table)).pipe(res);
-  else if (ast.queryType === 'update') req.pipe(new Update(null, ast.schema, ast.table)).pipe(res);
-  else req.pipe(res);
+
+  if (ast.bucketOp) {
+    res.write('ERROR bucket operations not implemented yet!');
+    res.end();
+    return;
+  }
+
+  var options = {
+    host: 'localhost',
+  };
+  if (ast.adminOp) {
+    options.user = process.env.ADMIN_USER;
+    options.password = process.env.ADMIN_PASSWORD;
+  } else {
+    options.user = ast.user;
+    options.password = ast.password;
+    options.database = ast.user;
+  }
+
+  debug('mysql options', options);
+
+  var mysql = new MysqlStream(null, options);
+  mysql.on('error', function (err) {
+    res.write(err);
+  });
+
+  if (ast.queryType === 'insert') {
+    var ins = new Insert(null, ast.schema, ast.table);
+    ins.on('error', function (err) {
+      res.write(err);
+    });
+    req.pipe(ins).pipe(mysql).pipe(res);
+  } else if (ast.queryType === 'update') {
+    var upd = Update(null, ast.schema, ast.table);
+    upd.on('error', function (err) {
+      res.write(err);
+    });
+    req.pipe(upd).pipe(mysql).pipe(res);
+  } else {
+    var buffer = '';
+    req.on('data', function (chunk) {
+      chunk = chunk.toString();
+      buffer += chunk;
+    });
+    req.on('end', function () {
+      try {
+        var sql = tosql(ast, buffer);
+        mysql.pipe(res);
+        mysql.write(sql);
+        mysql.end();
+        if (buffer.length !== contentLength) info('WARNING: data received less that indicated content length');
+      } catch (err) {
+        var result = {
+          error: 'ERROR parsing input, likely malformed/missing JSON: ' + err
+        };
+        res.write(JSON.stringify(result));
+        res.end();
+      }
+    });
+  }
+
+  req.on('close', function () {
+    log('close in request')
+  });
+  res.on('finish', function () {
+    log('finish in response')
+  });
+
 });
 
 
