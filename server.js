@@ -14,16 +14,41 @@ var MysqlStream = require('mysqlstream');
 // =============
 
 var log = console.log.bind(console);
-var debug = console.log.bind(console, 'DEBUG');
 var info = console.info.bind(console);
 var error = console.error.bind(console);
+
+var DEV_MODE = true;
+var debug, debugStream;
+if (DEV_MODE) {
+  debug = console.log.bind(console, 'DEBUG');
+  debugStream = process.stdout;
+} else {
+  debugStream = new require('stream').Writable();
+  ws.write = function(d){};
+}
+
 
 // HTTP server
 // ==========
 
+
 var server = http.Server();
 
 server.on('request', function (req, res) {
+
+  var handleError = function (err) {
+    res.write(err);
+    debug(err);
+  };
+
+  var parseJSON = function (j) {
+    try {
+      return JSON.parse(j);
+    } catch (err) {
+      handleError('Error parsing json: ' + err);
+    }
+  };
+
   var contentLength = parseInt(req.headers['content-length']);
   log('processing request: ', req.url, ' content length: ' + contentLength);
 
@@ -50,21 +75,15 @@ server.on('request', function (req, res) {
   debug('mysql options', options);
 
   var mysql = new MysqlStream(null, options);
-  mysql.on('error', function (err) {
-    res.write(err);
-  });
+  mysql.on('error', handleError);
 
   if (ast.queryType === 'insert') {
     var ins = new Insert(null, ast.schema, ast.table);
-    ins.on('error', function (err) {
-      res.write(err);
-    });
+    ins.on('error', handleError);
     req.pipe(ins).pipe(mysql).pipe(res);
   } else if (ast.queryType === 'update') {
     var upd = Update(null, ast.schema, ast.table);
-    upd.on('error', function (err) {
-      res.write(err);
-    });
+    upd.on('error', handleError);
     req.pipe(upd).pipe(mysql).pipe(res);
   } else {
     var buffer = '';
@@ -74,7 +93,13 @@ server.on('request', function (req, res) {
     });
     req.on('end', function () {
       try {
-        var sql = tosql(ast, buffer);
+        var json = parseJSON(buffer);
+        var sql = tosql(ast, json, DEV_MODE);
+
+        debug(sql);
+        debug(json);
+        mysql.pipe(debugStream);
+
         mysql.pipe(res);
         mysql.write(sql);
         mysql.end();

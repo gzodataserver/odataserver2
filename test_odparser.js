@@ -1,5 +1,6 @@
 var querystring = require("querystring");
 var remote = require('gzhelpers').remote;
+var jsonParseArray = require('jsonparsearray');
 
 // Setup logging
 // =============
@@ -43,6 +44,10 @@ remote.request(options, {
   .then(function (res) {
     console.log(res);
 
+    var p = new jsonParseArray();
+    p.write(res);
+    ACCOUNTID = p.get()[0].accountId;
+  
     options.path = '/' + ACCOUNTID + SYS_PATH + '/reset_password';
     options.method = 'POST';
     return remote.request(options, {
@@ -244,7 +249,7 @@ remote.request(options, {
     console.log(res);
 
     // SERVICE DEF
-    options.path = '/' + ACCOUNTID ;
+    options.path = '/' + ACCOUNTID;
     options.method = 'GET';
     return remote.request(options, null);
   })
