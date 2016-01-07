@@ -7,8 +7,8 @@ var jsonParseArray = require('jsonparsearray');
 
 var log = console.log.bind(console);
 var debug = console.log.bind(console, 'DEBUG');
-var info = console.info.bind(console);
-var error = console.error.bind(console);
+var info = console.info.bind(console, 'INFO');
+var error = console.error.bind(console, 'ERROR');
 
 // Tests
 // =====
@@ -24,43 +24,48 @@ var SYS_PATH = '/s';
 // Tests
 // =====
 
-var options = {
-  hostname: 'localhost',
-  port: 3000,
-  headers: {
-    user: ACCOUNTID,
-    database: ACCOUNTID, // I DON'T THINK THIS IS USED??
-    password: PASSWORD
+var createOptions = function (accountId, password, path, method) {
+  return {
+    hostname: 'localhost',
+    port: 3000,
+    path: path,
+    method: method,
+    headers: {
+      user: accountId,
+      password: password
+    }
   }
 };
 
-console.log('A web server should be running on localhost:3000');
+// json parser
+var p = new jsonParseArray();
 
-options.path = '/create_account';
-options.method = 'POST';
-remote.request(options, {
+log('A web server should be running on localhost:3000');
+
+remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     email: EMAIL
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
-    var p = new jsonParseArray();
     p.write(res);
     ACCOUNTID = p.get()[0].accountId;
-  
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/reset_password';
-    options.method = 'POST';
-    return remote.request(options, {
+
+    var path = '/' + ACCOUNTID + SYS_PATH + '/reset_password';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       accountId: ACCOUNTID,
       email: EMAIL
     })
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/create_table';
-    options.method = 'POST';
-    return remote.request(options, {
+    p.clear();
+    p.write(res);
+    PASSWORD = p.get()[0].password;
+
+    var path = '/' + ACCOUNTID + SYS_PATH + '/create_table';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       tableDef: {
         tableName: 'mytable',
         columns: ['col1 int', 'col2 varchar(255)']
@@ -68,136 +73,123 @@ remote.request(options, {
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // INSERT INTO
-    options.path = '/' + ACCOUNTID + '/mytable';
-    options.method = 'POST';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + '/mytable';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       col1: 22,
       col2: '22'
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // SELECT
-    options.path = '/' + ACCOUNTID + '/mytable';
-    options.method = 'GET';
-    return remote.request(options, null);
+    var path = '/' + ACCOUNTID + '/mytable';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // UPDATE
-    options.path = '/' + ACCOUNTID + '/mytable';
-    options.method = 'PUT';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + '/mytable';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'PUT'), {
       col2: '33'
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // GRANT
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/grant';
-    options.method = 'POST';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + SYS_PATH + '/grant';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       tableName: 'mytable',
       accountId: ACCOUNTID2
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // REVOKE
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/revoke';
-    options.method = 'POST';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + SYS_PATH + '/revoke';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       tableName: 'mytable',
       accountId: ACCOUNTID2
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // DELETE
     var filter = querystring.stringify({
       $filter: 'col1 eq 22'
     });
-    options.path = '/' + ACCOUNTID + '/mytable?' + filter;
-    options.method = 'DELETE';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + '/mytable?' + filter;
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'DELETE'), {
       tableName: 'mytable',
       accountId: ACCOUNTID2
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // METADATA
-    options.path = '/' + ACCOUNTID + '/mytable/$metadata';
-    options.method = 'GET';
-    return remote.request(options, null);
+    var path = '/' + ACCOUNTID + '/mytable/$metadata';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // INCORRECT BUCKET ADMIN OP
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/create_bucket2';
-    options.method = 'POST';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + SYS_PATH + '/create_bucket2';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       name: 'b_mybucket'
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // CREATE BUCKET
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/create_bucket';
-    options.method = 'POST';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + SYS_PATH + '/create_bucket';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       name: 'b_mybucket'
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // WRITE TO BUCKET
-    options.path = '/' + ACCOUNTID + '/b_mybucket';
-    options.method = 'POST';
-    return remote.request(options, 'Some data to write to the bucket...');
+    var path = '/' + ACCOUNTID + '/b_mybucket';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), 'Some data to write to the bucket...');
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // SELECT FROM BUCKET
-    options.path = '/' + ACCOUNTID + '/b_mybucket';
-    options.method = 'GET';
-    return remote.request(options, null);
+    var path = '/' + ACCOUNTID + '/b_mybucket';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // DROP BUCKET
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/drop_bucket';
-    options.method = 'POST';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + SYS_PATH + '/drop_bucket';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       name: 'b_mybucket'
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // DELETE ACCOUNT
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/delete_account';
-    options.method = 'POST';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + SYS_PATH + '/delete_account';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       email: EMAIL
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // FILTER & ORDER BY
     var params = querystring.stringify({
@@ -207,12 +199,11 @@ remote.request(options, {
       $skip: '10'
     });
 
-    options.path = '/schema/table?' + params;
-    options.method = 'GET';
-    return remote.request(options, null);
+    var path = '/schema/table?' + params;
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // FILTER, COLS, ORDER BY
     var params = querystring.stringify({
@@ -220,37 +211,33 @@ remote.request(options, {
       $filter: 'Price add 5 gt 10',
       $orderby: 'col2'
     });
-    options.path = '/schema/table?' + params;
-    options.method = 'GET';
-    return remote.request(options, null);
+    var path = '/schema/table?' + params;
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // ORDER BY
     var params = querystring.stringify({
       $orderby: 'col2'
     });
-    options.path = '/schema/table?' + params;
-    options.method = 'GET';
-    return remote.request(options, null);
+    var path = '/schema/table?' + params;
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // DROP TABLE
-    options.path = '/' + ACCOUNTID + SYS_PATH + '/delete_table';
-    options.method = 'POST';
-    return remote.request(options, {
+    var path = '/' + ACCOUNTID + SYS_PATH + '/delete_table';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       "tableName": "mytable"
     });
   })
   .then(function (res) {
-    console.log(res);
+    log(res);
 
     // SERVICE DEF
-    options.path = '/' + ACCOUNTID;
-    options.method = 'GET';
-    return remote.request(options, null);
+    var path = '/' + ACCOUNTID;
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
-  .done(console.log.bind(console), console.log.bind(console));
+  .done(log, log);

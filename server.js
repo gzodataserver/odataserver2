@@ -15,7 +15,7 @@ var MysqlStream = require('mysqlstream');
 
 var log = console.log.bind(console);
 var info = console.info.bind(console);
-var error = console.error.bind(console);
+var error = console.error.bind(console, 'ERROR');
 
 var DEV_MODE = true;
 var debug, debugStream;
@@ -38,7 +38,7 @@ server.on('request', function (req, res) {
 
   var handleError = function (err) {
     res.write(err);
-    debug(err);
+    error(err);
   };
 
   var parseJSON = function (j) {
@@ -50,10 +50,11 @@ server.on('request', function (req, res) {
   };
 
   var contentLength = parseInt(req.headers['content-length']);
-  log('processing request: ', req.url, ' content length: ' + contentLength);
-
   var ast = new OdParser().parseReq(req);
 
+  log('processing request: ', req.url, ' content length: ' + contentLength);
+  debug(ast);
+  
   if (ast.bucketOp) {
     res.write('ERROR bucket operations not implemented yet!');
     res.end();
