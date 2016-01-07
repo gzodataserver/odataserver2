@@ -82,10 +82,12 @@ server.on('request', function (req, res) {
     var ins = new Insert(null, ast.schema, ast.table);
     ins.on('error', handleError);
     req.pipe(ins).pipe(mysql).pipe(res);
+    mysql.pipe(debugStream);
   } else if (ast.queryType === 'update') {
     var upd = Update(null, ast.schema, ast.table);
     upd.on('error', handleError);
     req.pipe(upd).pipe(mysql).pipe(res);
+    mysql.pipe(debugStream);
   } else {
     var buffer = '';
     req.on('data', function (chunk) {
