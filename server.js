@@ -14,7 +14,7 @@ var MysqlStream = require('mysqlstream');
 // =============
 
 var log = console.log.bind(console);
-var info = console.info.bind(console);
+var info = console.info.bind(console, 'INFO');
 var error = console.error.bind(console, 'ERROR');
 
 var DEV_MODE = true;
@@ -43,13 +43,15 @@ server.on('request', function (req, res) {
 
   var parseJSON = function (j) {
     try {
-      return JSON.parse(j);
+      if (j && typeof j === 'string' && j.length) return JSON.parse(j);
+      else return null;
     } catch (err) {
       handleError('Error parsing json: ' + err);
     }
   };
 
   var contentLength = parseInt(req.headers['content-length']);
+  contentLength = (!isNaN(contentLength)) ? contentLength : 0;
   var ast = new OdParser().parseReq(req);
 
   log('processing request: ', req.url, ' content length: ' + contentLength);
@@ -82,11 +84,20 @@ server.on('request', function (req, res) {
     var ins = new Insert(null, ast.schema, ast.table);
     ins.on('error', handleError);
     req.pipe(ins).pipe(mysql).pipe(res);
+    
+    //debug
+    req.pipe(debugStream);
+    ins.pipe(debugStream);
     mysql.pipe(debugStream);
   } else if (ast.queryType === 'update') {
-    var upd = Update(null, ast.schema, ast.table);
+    debug('XXX', ast);
+    var upd = new Update(null, ast.schema, ast.table);
     upd.on('error', handleError);
     req.pipe(upd).pipe(mysql).pipe(res);
+    
+    // debug
+    req.pipe(debugStream);
+    upd.pipe(debugStream);
     mysql.pipe(debugStream);
   } else {
     var buffer = '';
