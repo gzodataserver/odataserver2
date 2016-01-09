@@ -49,7 +49,11 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     log(res);
 
     p.write(res);
-    ACCOUNTID = p.get()[0].accountId;
+
+    // get the account id also if the account already exists
+    if (p.get()[0].accountId) ACCOUNTID = p.get()[0].accountId;
+    else if (p.get()[1].accountId) ACCOUNTID = p.get()[1].accountId;
+    else throw "Did not get any account id!!";
 
     var path = '/' + ACCOUNTID + SYS_PATH + '/reset_password';
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
@@ -147,7 +151,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
       name: 'b_mybucket'
     });
   })
-  .then(function (res) {
+  .catch(function (res) {
     log(res);
 
     // CREATE BUCKET
@@ -182,15 +186,6 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
   .then(function (res) {
     log(res);
 
-    // DELETE ACCOUNT
-    var path = '/' + ACCOUNTID + SYS_PATH + '/delete_account';
-    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
-      email: EMAIL
-    });
-  })
-  .then(function (res) {
-    log(res);
-
     // FILTER & ORDER BY
     var params = querystring.stringify({
       $select: 'col1,col2',
@@ -199,7 +194,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
       $skip: '10'
     });
 
-    var path = '/schema/table?' + params;
+    var path = '/' + ACCOUNTID + '/mytable?' + params;
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
@@ -208,10 +203,10 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     // FILTER, COLS, ORDER BY
     var params = querystring.stringify({
       $select: 'col1,col2',
-      $filter: 'Price add 5 gt 10',
+      $filter: 'col1 add 5 gt 10',
       $orderby: 'col2'
     });
-    var path = '/schema/table?' + params;
+    var path = '/' + ACCOUNTID + '/mytable?' + params;
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
@@ -221,7 +216,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     var params = querystring.stringify({
       $orderby: 'col2'
     });
-    var path = '/schema/table?' + params;
+    var path = '/' + ACCOUNTID + '/mytable?' + params;
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
@@ -239,5 +234,14 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     // SERVICE DEF
     var path = '/' + ACCOUNTID;
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
+  })
+  .then(function (res) {
+    log(res);
+
+    // DELETE ACCOUNT
+    var path = '/' + ACCOUNTID + SYS_PATH + '/delete_account';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
+      email: EMAIL
+    });
   })
   .done(log, log);

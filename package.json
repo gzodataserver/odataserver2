@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/gizur/odataserver2#readme",
   "dependencies": {
-    "jsonparsearray": "0.0.1",
+    "gzhelpers": "*",
+    "jsonparsearray": "*",
     "mysqlstream": "*",
     "od2mysql": "*",
     "odparser": "*"

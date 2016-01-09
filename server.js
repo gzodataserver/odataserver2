@@ -24,7 +24,7 @@ if (DEV_MODE) {
   debugStream = process.stdout;
 } else {
   debugStream = new require('stream').Writable();
-  ws.write = function(d){};
+  ws.write = function (d) {};
 }
 
 
@@ -37,6 +37,13 @@ var server = http.Server();
 server.on('request', function (req, res) {
 
   var handleError = function (err) {
+
+    if (res.writeHead) {
+      res.writeHead(406, {
+        "Content-Type": "application/json"
+      });
+    }
+
     res.write(err);
     error(err);
   };
@@ -55,13 +62,11 @@ server.on('request', function (req, res) {
   var ast = new OdParser().parseReq(req);
 
   log('processing request: ', req.url, ' content length: ' + contentLength);
+
+  if (!ast) handleError('Unknown operation: ' + req.url);
+  if (ast.bucketOp) handleError('Bucket operations not implemented yet!');
+
   debug(ast);
-  
-  if (ast.bucketOp) {
-    res.write('ERROR bucket operations not implemented yet!');
-    res.end();
-    return;
-  }
 
   var options = {
     host: 'localhost',
@@ -80,26 +85,25 @@ server.on('request', function (req, res) {
   var mysql = new MysqlStream(null, options);
   mysql.on('error', handleError);
 
-  if (ast.queryType === 'insert') {
+  if (ast.queryType === 'insert' && !ast.bucketOp) {
     var ins = new Insert(null, ast.schema, ast.table);
     ins.on('error', handleError);
     req.pipe(ins).pipe(mysql).pipe(res);
-    
+
     //debug
     req.pipe(debugStream);
     ins.pipe(debugStream);
     mysql.pipe(debugStream);
-  } else if (ast.queryType === 'update') {
-    debug('XXX', ast);
+  } else if (ast.queryType === 'update' && !ast.bucketOp) {
     var upd = new Update(null, ast.schema, ast.table);
     upd.on('error', handleError);
     req.pipe(upd).pipe(mysql).pipe(res);
-    
+
     // debug
     req.pipe(debugStream);
     upd.pipe(debugStream);
     mysql.pipe(debugStream);
-  } else {
+  } else if (!ast.bucketOp) {
     var buffer = '';
     req.on('data', function (chunk) {
       chunk = chunk.toString();
@@ -126,6 +130,8 @@ server.on('request', function (req, res) {
         res.end();
       }
     });
+  } else {
+    res.end();
   }
 
   req.on('close', function () {
