@@ -2,7 +2,7 @@
 // ========
 
 var ConnectLight = require('connectlight');
-var OServerMysql = require('./odservermysql.js');
+var ODServerMysql = require('./odservermysql.js');
 var OdParser = require('odparser').OdParser;
 
 // Setup logging
@@ -24,13 +24,15 @@ if (DEV_MODE) {
 // ==========================
 
 var mws = new ConnectLight();
-var odsMysql = new OServerMysql();
+var odsMysql = new ODServerMysql();
 
 mws.use('/help', function (req, res, next) {
   res.write('/help matched!!');
   res.end();
   log('Matched /help - got request: ', req.url);
 });
+
+mws.use(OdParser.handleRequest);
 
 mws.use(function (req, res, next) {
 
@@ -41,8 +43,6 @@ mws.use(function (req, res, next) {
     res.write(err);
     error(err);
   };
-
-  req.ast = new OdParser().parseReq(req);
 
   var contentLength = parseInt(req.headers['content-length']);
   contentLength = (!isNaN(contentLength)) ? contentLength : 0;
@@ -56,10 +56,6 @@ mws.use(function (req, res, next) {
   next();
 });
 
-mws.use(function (req, res, next) {
-  req.ast = new OdParser().parseReq(req);
-  next();
-});
 
 mws.use(odsMysql.handleRequest);
 
