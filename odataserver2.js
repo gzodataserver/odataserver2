@@ -3,7 +3,13 @@
 
 var ConnectLight = require('connectlight');
 var ODServerMysql = require('./odservermysql.js');
+var ODServerLevelDb = require('./odserverleveldb.js');
 var OdParser = require('odparser').OdParser;
+
+// constants
+// =========
+
+var LEVELDB_PATH = './mydb'
 
 // Setup logging
 // =============
@@ -25,6 +31,7 @@ if (DEV_MODE) {
 
 var mws = new ConnectLight();
 var odsMysql = new ODServerMysql();
+var odsLevelDb = new ODServerLevelDb(LEVELDB_PATH);
 
 mws.use('/help', function (req, res, next) {
   res.write('/help matched!!');
@@ -49,15 +56,14 @@ mws.use(function (req, res, next) {
   log('processing request: ', req.url, ' content length: ' + contentLength);
 
   if (!req.ast) handleError('Unknown operation: ' + req.url);
-  if (req.ast.bucketOp) handleError('Bucket operations not implemented yet!');
 
   debug(req.ast);
 
   next();
 });
 
-
-mws.use(odsMysql.handleRequest);
+mws.use(odsMysql.handleRequests());
+mws.use(odsLevelDb.handleRequests());
 
 mws.listen(3000);
 

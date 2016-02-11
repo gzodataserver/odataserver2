@@ -1,8 +1,8 @@
 // imports
 // =======
 
-var LevelDbWriteStream = require('./leveldbwritestream.js');
-var LevelDbReadStream = require('./leveldbreadstream.js');
+var LevelDbWriteStream = require('leveldbstreams').LevelDbWriteStream;
+var LevelDbReadStream = require('leveldbstreams').LevelDbReadStream;
 
 var levelup = require('levelup');
 
@@ -29,40 +29,44 @@ var OD = function (filename) {
   this.db = levelup(filename);
 };
 
-var OD.prototype.handleRequest = function (req, res, next) {
-  var db = this.db;
+OD.prototype.handleRequests = function () {
+  var self = this;
+  
+  return function (req, res, next) {
+    log(req.url, req.method);
+    debug(req.headers);
 
-  log(req.url, req.method);
-  debug(req.headers);
+    var key = req.url.substr(1);
+    if (key === '') {
+      res.end('Key is missing, URL should include a key');
+      return;
+    }
 
-  var key = req.url.substr(1);
-  if (key === '') {
-    res.end('Key is missing, URL should include a key');
-    return;
+    if (req.method === 'POST') {
+      var ws = new LevelDbWriteStream(null, self.db, key);
+      req.pipe(ws);
+
+      ws.on('finish', function () {
+        res.end();
+      });
+
+      ws.on('error', function (err) {
+        error(err);
+      });
+    }
+
+    if (req.method === 'GET') {
+      var rs = new LevelDbReadStream(null, self.db, key);
+
+      rs.on('error', function (err) {
+        error(err);
+        res.end('' + err);
+      });
+
+      rs.pipe(res);
+    }
+
   }
-
-  if (req.method === 'POST') {
-    var ws = new LevelDbWriteStream(null, db, key);
-    req.pipe(ws);
-
-    ws.on('finish', function () {
-      res.end();
-    });
-
-    ws.on('error', function (err) {
-      error(err);
-    });
-  }
-
-  if (req.method === 'GET') {
-    var rs = new LevelDbReadStream(null, db, key);
-
-    rs.on('error', function (err) {
-      error(err);
-      res.end('' + err);
-    });
-
-    rs.pipe(res);
-  }
-
 };
+
+module.exports = OD;

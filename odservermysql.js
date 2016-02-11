@@ -29,103 +29,105 @@ if (DEV_MODE) {
 
 var OD = function () {}
 
-OD.prototype.handleRequest = function (req, res, next) {
+OD.prototype.handleRequests = function () {
+  return function (req, res, next) {
 
-  var handleError = function (err) {
-    res.writeHead(406, {
-      "Content-Type": "application/json"
-    });
-    res.write(err);
-    error(err);
-  };
+    var handleError = function (err) {
+      res.writeHead(406, {
+        "Content-Type": "application/json"
+      });
+      res.write(err);
+      error(err);
+    };
 
-  var parseJSON = function (j) {
-    try {
-      if (j && typeof j === 'string' && j.length) return JSON.parse(j);
-      else return null;
-    } catch (err) {
-      handleError('Error parsing json: ' + err);
-    }
-  };
-
-  var contentLength = parseInt(req.headers['content-length']);
-  contentLength = (!isNaN(contentLength)) ? contentLength : 0;
-  var ast = req.ast;
-
-  var options = {
-    host: 'localhost',
-  };
-  if (ast.adminOp) {
-    options.user = process.env.ADMIN_USER;
-    options.password = process.env.ADMIN_PASSWORD;
-  } else {
-    options.user = ast.user;
-    options.password = ast.password;
-    options.database = ast.user;
-  }
-
-  debug('mysql options', options);
-
-  var mysql = new MysqlStream(null, options);
-  mysql.on('error', handleError);
-
-  if (ast.queryType === 'insert' && !ast.bucketOp) {
-    var ins = new Insert(null, ast.schema, ast.table);
-    ins.on('error', handleError);
-    req.pipe(ins).pipe(mysql).pipe(res);
-
-    //debug
-    req.pipe(debugStream);
-    ins.pipe(debugStream);
-    mysql.pipe(debugStream);
-  } else if (ast.queryType === 'update' && !ast.bucketOp) {
-    var upd = new Update(null, ast.schema, ast.table);
-    upd.on('error', handleError);
-    req.pipe(upd).pipe(mysql).pipe(res);
-
-    // debug
-    req.pipe(debugStream);
-    upd.pipe(debugStream);
-    mysql.pipe(debugStream);
-  } else if (!ast.bucketOp) {
-    var buffer = '';
-    req.on('data', function (chunk) {
-      chunk = chunk.toString();
-      buffer += chunk;
-    });
-    req.on('end', function () {
+    var parseJSON = function (j) {
       try {
-        var json = parseJSON(buffer);
-        var sql = tosql(ast, json, DEV_MODE);
-
-        debug(sql);
-        debug(json);
-        mysql.pipe(debugStream);
-
-        mysql.pipe(res);
-        mysql.write(sql);
-        mysql.end();
-        if (buffer.length !== contentLength) info('WARNING: data received less that indicated content length');
+        if (j && typeof j === 'string' && j.length) return JSON.parse(j);
+        else return null;
       } catch (err) {
-        var result = {
-          error: 'ERROR parsing input, likely malformed/missing JSON: ' + err
-        };
-        res.write(JSON.stringify(result));
-        res.end();
+        handleError('Error parsing json: ' + err);
       }
+    };
+
+    var contentLength = parseInt(req.headers['content-length']);
+    contentLength = (!isNaN(contentLength)) ? contentLength : 0;
+    var ast = req.ast;
+
+    var options = {
+      host: 'localhost',
+    };
+    if (ast.adminOp) {
+      options.user = process.env.ADMIN_USER;
+      options.password = process.env.ADMIN_PASSWORD;
+    } else {
+      options.user = ast.user;
+      options.password = ast.password;
+      options.database = ast.user;
+    }
+
+    debug('mysql options', options);
+
+    var mysql = new MysqlStream(null, options);
+    mysql.on('error', handleError);
+
+    if (ast.queryType === 'insert' && !ast.bucketOp) {
+      var ins = new Insert(null, ast.schema, ast.table);
+      ins.on('error', handleError);
+      req.pipe(ins).pipe(mysql).pipe(res);
+
+      //debug
+      req.pipe(debugStream);
+      ins.pipe(debugStream);
+      mysql.pipe(debugStream);
+    } else if (ast.queryType === 'update' && !ast.bucketOp) {
+      var upd = new Update(null, ast.schema, ast.table);
+      upd.on('error', handleError);
+      req.pipe(upd).pipe(mysql).pipe(res);
+
+      // debug
+      req.pipe(debugStream);
+      upd.pipe(debugStream);
+      mysql.pipe(debugStream);
+    } else if (!ast.bucketOp) {
+      var buffer = '';
+      req.on('data', function (chunk) {
+        chunk = chunk.toString();
+        buffer += chunk;
+      });
+      req.on('end', function () {
+        try {
+          var json = parseJSON(buffer);
+          var sql = tosql(ast, json, DEV_MODE);
+
+          debug(sql);
+          debug(json);
+          mysql.pipe(debugStream);
+
+          mysql.pipe(res);
+          mysql.write(sql);
+          mysql.end();
+          if (buffer.length !== contentLength) info('WARNING: data received less that indicated content length');
+
+        } catch (err) {
+          var result = {
+            error: 'ERROR parsing input, likely malformed/missing JSON: ' + err
+          };
+          res.write(JSON.stringify(result));
+          res.end();
+        }
+      });
+    } else {
+      if (next) next();
+    }
+
+    req.on('close', function () {
+      log('close in request')
     });
-  } else {
-    res.end();
+    res.on('finish', function () {
+      log('finish in response')
+    });
+
   }
-
-  req.on('close', function () {
-    log('close in request')
-  });
-  res.on('finish', function () {
-    log('finish in response')
-  });
-
-  if (next) next();
 };
 
 // exports

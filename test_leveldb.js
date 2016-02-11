@@ -89,7 +89,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    log(res);
+    log('BUCKET CONTENTS:', res);
 
     // DROP BUCKET
     var path = '/' + ACCOUNTID + SYS_PATH + '/drop_bucket';

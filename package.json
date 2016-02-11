@@ -24,6 +24,7 @@
     "connectlight": "*",
     "gzhelpers": "*",
     "jsonparsearray": "*",
+    "leveldbstreams": "*",
     "mysqlstream": "*",
     "od2mysql": "*",
     "odparser": "*"
