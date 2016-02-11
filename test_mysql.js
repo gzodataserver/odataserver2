@@ -125,19 +125,6 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
   .then(function (res) {
     log(res);
 
-    // DELETE
-    var filter = querystring.stringify({
-      $filter: 'col1 eq 22'
-    });
-    var path = '/' + ACCOUNTID + '/mytable?' + filter;
-    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'DELETE'), {
-      tableName: 'mytable',
-      accountId: ACCOUNTID2
-    });
-  })
-  .then(function (res) {
-    log(res);
-
     // METADATA
     var path = '/' + ACCOUNTID + '/mytable/$metadata';
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
@@ -146,6 +133,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     log(res);
 
     // INCORRECT BUCKET ADMIN OP
+    log('Testing incorrect bucket admin op.')
     var path = '/' + ACCOUNTID + SYS_PATH + '/create_bucket2';
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       name: 'b_mybucket'
@@ -154,42 +142,10 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
   .catch(function (res) {
     log(res);
 
-    // CREATE BUCKET
-    var path = '/' + ACCOUNTID + SYS_PATH + '/create_bucket';
-    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
-      name: 'b_mybucket'
-    });
-  })
-  .then(function (res) {
-    log(res);
-
-    // WRITE TO BUCKET
-    var path = '/' + ACCOUNTID + '/b_mybucket';
-    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), 'Some data to write to the bucket...');
-  })
-  .then(function (res) {
-    log(res);
-
-    // SELECT FROM BUCKET
-    var path = '/' + ACCOUNTID + '/b_mybucket';
-    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
-  })
-  .then(function (res) {
-    log(res);
-
-    // DROP BUCKET
-    var path = '/' + ACCOUNTID + SYS_PATH + '/drop_bucket';
-    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
-      name: 'b_mybucket'
-    });
-  })
-  .then(function (res) {
-    log(res);
-
     // FILTER & ORDER BY
     var params = querystring.stringify({
-      $select: 'col1,col2',
-      $filter: 'co1 eq "help"',
+      $select: 'col1, col2',
+      $filter: 'col1 eq "help"',
       $orderby: 'col2',
       $skip: '10'
     });
@@ -220,6 +176,18 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
+    log(res);
+
+    // DELETE
+    var filter = querystring.stringify({
+      $filter: 'col1 eq 22'
+    });
+    var path = '/' + ACCOUNTID + '/mytable?' + filter;
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'DELETE'), {
+      tableName: 'mytable',
+      accountId: ACCOUNTID2
+    });
+  }).then(function (res) {
     log(res);
 
     // DROP TABLE

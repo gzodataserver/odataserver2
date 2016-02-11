@@ -5,6 +5,17 @@ odataserver2
 and built using [streams](https://nodejs.org/api/stream.html).
 
 
+Getting started
+==============
+
+Make sure that MySQL is running, create `setenv` by copying `setenv.template` and update with 
+the database credentials.
+
+Start the server: `source setenv; node odataserver2`
+
+Run the tests to see that everything works: `node test_mysql.js`
+
+
 ToDo
 ====
 
