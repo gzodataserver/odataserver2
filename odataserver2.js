@@ -5,6 +5,7 @@ var ConnectLight = require('connectlight');
 var ODServerMysql = require('./odservermysql.js');
 var ODServerLevelDb = require('./odserverleveldb.js');
 var OdParser = require('odparser').OdParser;
+var OdAcl = require('odacl');
 
 // constants
 // =========
@@ -41,29 +42,37 @@ mws.use('/help', function (req, res, next) {
 
 mws.use(OdParser.handleRequest);
 
-mws.use(function (req, res, next) {
+var handleError = function (req, res, next, err) {
+  res.writeHead(406, {
+    "Content-Type": "application/json"
+  });
+  res.write(JSON.stringify({
+    err: err
+  }));
+  error(err);
+  next();
+};
 
-  var handleError = function (err) {
-    res.writeHead(406, {
-      "Content-Type": "application/json"
-    });
-    res.write(err);
-    error(err);
-  };
+mws.use(function (req, res, next) {
 
   var contentLength = parseInt(req.headers['content-length']);
   contentLength = (!isNaN(contentLength)) ? contentLength : 0;
   log('processing request: ', req.url, ' content length: ' + contentLength);
 
-  if (!req.ast) handleError('Unknown operation: ' + req.url);
+  if (!req.ast) handleError(req, res, next, 'Unknown operation: ' + req.url);
 
   debug(req.ast);
 
   next();
 });
 
-mws.use(odsMysql.handleRequests());
-mws.use(odsLevelDb.handleRequests());
+mws.use(odsMysql.handleRequest());
+
+var acl = new OdAcl('perms', {
+  host: 'localhost'
+}, handleError);
+mws.use(acl.handleRequest());
+mws.use(odsLevelDb.handleRequest());
 
 mws.listen(3000);
 

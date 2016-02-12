@@ -29,7 +29,7 @@ var OD = function (filename) {
   this.db = levelup(filename);
 };
 
-OD.prototype.handleRequests = function () {
+OD.prototype.handleRequest = function () {
   var self = this;
   
   return function (req, res, next) {

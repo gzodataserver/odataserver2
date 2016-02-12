@@ -29,7 +29,7 @@ if (DEV_MODE) {
 
 var OD = function () {}
 
-OD.prototype.handleRequests = function () {
+OD.prototype.handleRequest = function () {
   return function (req, res, next) {
 
     var handleError = function (err) {

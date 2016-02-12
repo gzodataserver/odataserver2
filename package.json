@@ -1,8 +1,8 @@
 {
   "name": "odataserver2",
   "version": "0.0.1",
-  "description": "OData server on top of MySQL",
-  "main": "index.js",
+  "description": "OData server on top of MySQL and LeveDb",
+  "main": "odataserver2.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,6 +27,7 @@
     "leveldbstreams": "*",
     "mysqlstream": "*",
     "od2mysql": "*",
+    "odacl": "*",
     "odparser": "*"
   }
 }
