@@ -35,10 +35,22 @@ var odsMysql = new ODServerMysql();
 var odsLevelDb = new ODServerLevelDb(LEVELDB_PATH);
 
 mws.use('/help', function (req, res, next) {
-  res.write('/help matched!!');
-  res.end();
-  log('Matched /help - got request: ', req.url);
+  var path = require('path');
+  var fs = require('fs');
+  var dir = path.join(path.dirname(fs.realpathSync(__filename)), './');
+
+  var fileStream = fs.createReadStream(dir + 'Usage.md');
+  res.writeHead(200, {
+    'Content-Type': 'text/plain'
+  });
+
+  fileStream.on('end', function () {
+    res.end();
+  });
+
+  fileStream.pipe(res);
 });
+
 
 mws.use(OdParser.handleRequest);
 
