@@ -77,6 +77,18 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
   .then(function (res) {
     log(res);
 
+    // GRANT
+    var path = '/' + ACCOUNTID + '/s/grant_bucket';
+    debug(path);
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
+      name: 'b_mybucket', // previously tableName
+      verbs: ['select', 'insert', 'update', 'delete'],
+      accountId: ACCOUNTID
+    });
+  })
+  .then(function (res) {
+    log(res);
+
     // WRITE TO BUCKET
     var path = '/' + ACCOUNTID + '/b_mybucket';
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), 'Some data to write to the bucket...');
@@ -90,6 +102,18 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
   })
   .then(function (res) {
     log('BUCKET CONTENTS:', res);
+
+    // REVOKE
+    var path = '/' + ACCOUNTID + '/s/revoke_bucket';
+    debug(path);
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
+      name: 'b_mybucket', // previously tableName
+      verbs: ['select', 'insert', 'update', 'delete'],
+      accountId: ACCOUNTID
+    });
+  })
+  .then(function (res) {
+    log(res);
 
     // DROP BUCKET
     var path = '/' + ACCOUNTID + SYS_PATH + '/drop_bucket';
