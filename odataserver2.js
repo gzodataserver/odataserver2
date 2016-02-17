@@ -98,4 +98,11 @@ process.on('exit', function (code) {
   log('About to exit with code:', code);
 });
 
+process.on('uncaughtException', function (code) {
+  error('uncaughtException error:', code);
+  /*mws.close(function(){
+    mws.listen(3000);
+  });*/
+});
+
 log('server running on port 3000');
