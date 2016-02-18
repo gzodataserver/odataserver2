@@ -258,6 +258,23 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
       "col2": "33"
     }], 'GET mytable with filter');
 
+    // FILTER, COLS, ORDER BY
+    var params = querystring.stringify({
+      $select: 'col1,col2',
+      $filter: 'col1 add 5 gt 10',
+      $orderby: 'col2'
+    });
+    var path = '/' + ACCOUNTID + '/mytable/$etag?' + params;
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
+  })
+  .then(function (res) {
+    assertJSON(p, res, [{
+      "queryType": "etag"
+    }, {
+      "col1": 22,
+      "col2": "33"
+    }], 'GET mytable etag with filter');
+
     // ORDER BY
     var params = querystring.stringify({
       $orderby: 'col2'
@@ -282,7 +299,8 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
       tableName: 'mytable',
       accountId: ACCOUNTID2
     });
-  }).then(function (res) {
+  })
+  .then(function (res) {
     assertJSON(p, res, [{
       "queryType": "delete"
     }, {
@@ -321,7 +339,9 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    assertJSON(p, res, [{"queryType":"service_def"}], 'GET / (service def)');
+    assertJSON(p, res, [{
+      "queryType": "service_def"
+    }], 'GET / (service def)');
 
     // DELETE ACCOUNT
     var path = '/' + ACCOUNTID + SYS_PATH + '/delete_account';

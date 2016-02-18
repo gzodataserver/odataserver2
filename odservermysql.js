@@ -67,7 +67,16 @@ OD.prototype.handleRequest = function () {
 
     debug('mysql options', options);
 
-    var mysql = new MysqlStream(null, options);
+    var mysql;
+    if (ast.queryType === 'etag..')
+      mysql = new MysqlStream({
+        etagAlg: 'md5',
+        etagDigest: 'hex'
+      }, options);
+    else
+      mysql = new MysqlStream(null, options);
+
+
     mysql.on('error', handleError);
 
     if (ast.queryType === 'insert' && !ast.bucketOp) {
