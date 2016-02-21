@@ -268,14 +268,14 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    assertJSON(p, res, [{
-        'odata.etag': '99938282f04071859941e18f16efcf42',
-        queryType: 'select'
-      },
-      {
-        'odata.etag': 'e0f7a4d0ef9b84b83b693bbf3feb8e6e',
-        col1: 22
-      }], 'GET mytable etag with filter');
+      assertJSON(p, res, [{
+          '@odata.etag': '99938282f04071859941e18f16efcf42',
+          queryType: 'select'
+        },
+        {
+          '@odata.etag': 'e0f7a4d0ef9b84b83b693bbf3feb8e6e',
+          col1: 22
+        }], 'GET mytable etag with filter');
 
     // ORDER BY
     var params = querystring.stringify({
@@ -284,7 +284,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     var path = '/' + ACCOUNTID + '/mytable?' + params;
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
-  .then(function (res) {
+.then(function (res) {
     assertJSON(p, res, [{
       "queryType": "select"
     }, {
