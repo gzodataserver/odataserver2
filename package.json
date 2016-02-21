@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/gizur/odataserver2#readme",
   "dependencies": {
+    "checkhashstream": "0.0.1",
     "connectlight": "*",
     "gzhelpers": "*",
     "jsonparsearray": "*",

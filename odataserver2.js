@@ -51,6 +51,22 @@ mws.use('/help', function (req, res, next) {
   fileStream.pipe(res);
 });
 
+mws.use('/help2', function (req, res, next) {
+  var path = require('path');
+  var fs = require('fs');
+  var dir = path.join(path.dirname(fs.realpathSync(__filename)), './');
+
+  var fileStream = fs.createReadStream(dir + 'Usage2.md');
+  res.writeHead(200, {
+    'Content-Type': 'text/plain'
+  });
+
+  fileStream.on('end', function () {
+    res.end();
+  });
+
+  fileStream.pipe(res);
+});
 
 mws.use(OdParser.handleRequest);
 

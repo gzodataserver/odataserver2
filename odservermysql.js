@@ -8,6 +8,7 @@ var Insert = require('odparser').json2sql.Insert;
 var tosql = require('od2mysql');
 var MysqlStream = require('mysqlstream');
 
+var CheckHashStream = require('checkhashstream');
 
 // Setup logging
 // =============
@@ -53,9 +54,11 @@ OD.prototype.handleRequest = function () {
     contentLength = (!isNaN(contentLength)) ? contentLength : 0;
     var ast = req.ast;
 
+
     var options = {
       host: 'localhost',
     };
+
     if (ast.adminOp) {
       options.user = process.env.ADMIN_USER;
       options.password = process.env.ADMIN_PASSWORD;
@@ -65,18 +68,16 @@ OD.prototype.handleRequest = function () {
       options.database = ast.user;
     }
 
-    debug('mysql options', options);
-
-    var mysql;
-    if (ast.queryType === 'etag..')
-      mysql = new MysqlStream({
-        etagAlg: 'md5',
-        etagDigest: 'hex'
-      }, options);
-    else
-      mysql = new MysqlStream(null, options);
-
-
+    // setup mysqlstream
+    if (ast.etagCols) ast.etagCols.push('queryType');
+    var etagOptions = (ast.etagCols) ? {
+      etagAlg: 'md5',
+      etagDigest: 'hex',
+      etagCols: ast.etagCols
+    } : null;
+    var mysql = new MysqlStream(etagOptions, options);
+    debug('mysql options', options, 'etag options', etagOptions);
+    
     mysql.on('error', handleError);
 
     if (ast.queryType === 'insert' && !ast.bucketOp) {
@@ -107,15 +108,46 @@ OD.prototype.handleRequest = function () {
         try {
           var json = parseJSON(buffer);
           var sql = tosql(ast, json, DEV_MODE);
-
           debug(sql);
           debug(json);
-          mysql.pipe(debugStream);
 
-          mysql.pipe(res);
-          mysql.write(sql);
-          mysql.end();
           if (buffer.length !== contentLength) info('WARNING: data received less that indicated content length');
+
+          // Answer with 304 if the etag matches
+          if (req.headers['if-none-match']) {
+            var ws = new CheckHashStream({
+              hashAlg: 'md5',
+              hashDigest: 'hex'
+            }, req.headers['if-none-match']);
+
+            mysql.pipe(ws
+              /*, {
+                            end: false
+                          }*/
+            );
+
+            mysql.write(sql);
+            mysql.end();
+
+            if (!ws.get()) {
+              debug('NOT MODIFIED')
+              res.writeHead(304);
+              res.end();
+              return;
+            }
+
+            res.end(ws.get());
+          }
+
+          // Do not check against etag
+          else {
+            mysql.pipe(debugStream);
+
+            mysql.pipe(res);
+            mysql.write(sql);
+            mysql.end();
+
+          }
 
         } catch (err) {
           var result = {

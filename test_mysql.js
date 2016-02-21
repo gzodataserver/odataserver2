@@ -260,20 +260,22 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
 
     // FILTER, COLS, ORDER BY
     var params = querystring.stringify({
-      $select: 'col1,col2',
+      $select: 'col1,@odata.etag',
       $filter: 'col1 add 5 gt 10',
       $orderby: 'col2'
     });
-    var path = '/' + ACCOUNTID + '/mytable/$etag?' + params;
+    var path = '/' + ACCOUNTID + '/mytable?' + params;
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
     assertJSON(p, res, [{
-      "queryType": "etag"
-    }, {
-      "col1": 22,
-      "col2": "33"
-    }], 'GET mytable etag with filter');
+        'odata.etag': '99938282f04071859941e18f16efcf42',
+        queryType: 'select'
+      },
+      {
+        'odata.etag': 'e0f7a4d0ef9b84b83b693bbf3feb8e6e',
+        col1: 22
+      }], 'GET mytable etag with filter');
 
     // ORDER BY
     var params = querystring.stringify({
