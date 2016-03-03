@@ -16,9 +16,9 @@ Getting started
 First install the with `npm install`
 
 Make sure that MySQL is running, create `setenv` by copying `setenv.template` and update with 
-the database credentials.
+the database credentials. On Windows, create `setenv.bat` using `setenv.template.bat`.
 
-Start the server: `source setenv; node odataserver2`
+Start the server: `source setenv; node odataserver2`. On Windows run `setenv.bat` followed by `node odataserver2`.
 
 Run the tests to see that everything works: `node test_mysql.js`
 
