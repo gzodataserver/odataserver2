@@ -33,13 +33,14 @@ There are man different process management tools. I'm using [supervisor](http://
 A NodeJS based alternative is forever.
 
 
-Here is an example of a supervisor configuration (update the paths according to your setup).
+Here is an example of a supervisor configuration (update the this according to your setup).
 
 ```
 
 [program:odataserver2]
 directory=/apps
 environment =
+  CONNECT_FROM_HOST="%"
   DB_HOST="mariadb",
   ADMIN_USER="root",
   ADMIN_PASSWORD="67746de89723d844a031e88d8cba5164",
