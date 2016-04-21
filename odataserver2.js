@@ -97,7 +97,7 @@ mws.use(function (req, res, next) {
 mws.use(odsMysql.handleRequest());
 
 var acl = new OdAcl('perms', {
-  host: 'localhost'
+  host: process.env.DB_HOST
 }, handleError);
 mws.use(acl.handleRequest());
 mws.use(odsLevelDb.handleRequest());

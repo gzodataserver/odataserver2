@@ -56,7 +56,7 @@ OD.prototype.handleRequest = function () {
 
 
     var options = {
-      host: 'localhost',
+      host: process.env.DB_HOST
     };
 
     if (ast.adminOp) {
@@ -77,7 +77,7 @@ OD.prototype.handleRequest = function () {
     } : null;
     var mysql = new MysqlStream(etagOptions, options);
     debug('mysql options', options, 'etag options', etagOptions);
-    
+
     mysql.on('error', handleError);
 
     if (ast.queryType === 'insert' && !ast.bucketOp) {

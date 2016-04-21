@@ -1,3 +1,4 @@
+export DB_HOST=hostname
 export ADMIN_USER=root
 export ADMIN_PASSWORD=secret
 export MAIL_USER=mail@example.com
