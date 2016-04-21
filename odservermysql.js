@@ -107,7 +107,7 @@ OD.prototype.handleRequest = function () {
       req.on('end', function () {
         try {
           var json = parseJSON(buffer);
-          var sql = tosql(ast, json, DEV_MODE, process.env.DB_HOST);
+          var sql = tosql(ast, json, DEV_MODE);
           debug(sql);
           debug(json);
 
