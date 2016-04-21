@@ -27,7 +27,7 @@ var SYS_PATH = '/s';
 
 var createOptions = function (accountId, password, path, method) {
   return {
-    hostname: process.env.DB_HOST,
+    hostname: 'localhost',
     port: 3000,
     path: path,
     method: method,
