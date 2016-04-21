@@ -17,7 +17,7 @@ var error = console.error.bind(console, 'ERROR');
 var EMAIL = 'joe@example.com';
 var ACCOUNTID = 'accountid';
 var PASSWORD = 'password';
-var EMAIL2 = 'joe@example.com';
+var EMAIL2 = 'joe2@example.com';
 var ACCOUNTID2 = 'accountid';
 var PASSWORD2 = 'password2';
 var SYS_PATH = '/s';
@@ -80,6 +80,21 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     p.write(res);
     PASSWORD = p.get()[0].password;
 
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
+      email: EMAIL2
+    })
+  })
+  .then(function (res) {
+    log(res);
+
+    p.clear();
+    p.write(res);
+
+    // get the account id also if the account already exists
+    if (p.get()[0].accountId) ACCOUNTID2 = p.get()[0].accountId;
+    else if (p.get()[1].accountId) ACCOUNTID2 = p.get()[1].accountId;
+    else throw "Did not get any account id!!";
+
     var path = '/' + ACCOUNTID + SYS_PATH + '/create_table';
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       tableDef: {
@@ -90,18 +105,17 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
   })
   .then(function (res) {
     assertJSON(p, res, [{
-        queryType: 'create_table'
-      },
-      {
-        fieldCount: 0,
-        affectedRows: 0,
-        insertId: 0,
-        serverStatus: 2,
-        warningCount: 0,
-        message: '',
-        protocol41: true,
-        changedRows: 0
-      }], 'create_table');
+      queryType: 'create_table'
+    }, {
+      fieldCount: 0,
+      affectedRows: 0,
+      insertId: 0,
+      serverStatus: 2,
+      warningCount: 0,
+      message: '',
+      protocol41: true,
+      changedRows: 0
+    }], 'create_table');
 
     // INSERT INTO
     var path = '/' + ACCOUNTID + '/mytable';
@@ -121,7 +135,6 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
       "protocol41": true,
       "changedRows": 0
     }], 'POST mytable')
-
 
     // SELECT
     var path = '/' + ACCOUNTID + '/mytable';
@@ -268,14 +281,13 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-      assertJSON(p, res, [{
-          '@odata.etag': '99938282f04071859941e18f16efcf42',
-          queryType: 'select'
-        },
-        {
-          '@odata.etag': 'e0f7a4d0ef9b84b83b693bbf3feb8e6e',
-          col1: 22
-        }], 'GET mytable etag with filter');
+    assertJSON(p, res, [{
+      '@odata.etag': '99938282f04071859941e18f16efcf42',
+      queryType: 'select'
+    }, {
+      '@odata.etag': 'e0f7a4d0ef9b84b83b693bbf3feb8e6e',
+      col1: 22
+    }], 'GET mytable etag with filter');
 
     // ORDER BY
     var params = querystring.stringify({
@@ -284,7 +296,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     var path = '/' + ACCOUNTID + '/mytable?' + params;
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
-.then(function (res) {
+  .then(function (res) {
     assertJSON(p, res, [{
       "queryType": "select"
     }, {
@@ -330,7 +342,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
       "affectedRows": 0,
       "insertId": 0,
       "serverStatus": 2,
-      "warningCount": 0,
+      "warningCount": 1,
       "message": "",
       "protocol41": true,
       "changedRows": 0
