@@ -18,7 +18,7 @@ var EMAIL = 'joe@example.com';
 var ACCOUNTID = 'accountid';
 var PASSWORD = 'password';
 var EMAIL2 = 'joe2@example.com';
-var ACCOUNTID2 = 'accountid';
+var ACCOUNTID2 = 'accountid2';
 var PASSWORD2 = 'password2';
 var SYS_PATH = '/s';
 
