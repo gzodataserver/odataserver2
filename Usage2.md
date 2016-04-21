@@ -19,7 +19,7 @@ Create an  account
 >ACCOUNTID=...
 
 
->curl -d '{"accountId":"'$ACCOUNTID'","email":"'$EMAIL'"}' $SERVER/0b213a639078/s/reset_password
+>curl -d '{"accountId":"'$ACCOUNTID'","email":"'$EMAIL'"}' $SERVER/$ACCOUNTID/s/reset_password
 >PASSWORD=...
 
 
