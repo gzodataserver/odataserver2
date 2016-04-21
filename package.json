@@ -1,6 +1,6 @@
 {
   "name": "odataserver2",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "OData server on top of MySQL and LeveDb",
   "main": "odataserver2.js",
   "scripts": {
