@@ -23,6 +23,31 @@ Start the server: `source setenv; node odataserver2`. On Windows run `setenv.bat
 Run the tests to see that everything works: `node test_mysql.js`
 
 
+Process management
+-----------------
+
+There are man different process management tools. I'm using [supervisor](http://supervisord.org).
+A NodeJS based alternative is forever.
+
+
+Here is an example of a supervisor configuration (update the paths according to your setup).
+
+```
+
+[program:odataserver2]
+directory=/apps
+environment =
+  DB_HOST="mariadb",
+  ADMIN_USER="root",
+  ADMIN_PASSWORD="67746de89723d844a031e88d8cba5164",
+  MAIL_USER="noreply@gizur.com",
+  MAIL_PASSWORD="MX2rFOPvwv1VEGAWSZ20kni2A/cNZ3V33gboTLu9cAg="
+command=node /apps/node_modules/odataserver2/odataserver2.js
+stdout_logfile=syslog
+stderr_logfile=syslog
+autorestart=true```
+
+
 ToDo
 ---
 
