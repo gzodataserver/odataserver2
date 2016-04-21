@@ -107,9 +107,10 @@ OD.prototype.handleRequest = function () {
       req.on('end', function () {
         try {
           var json = parseJSON(buffer);
-          var sql = tosql(ast, json, DEV_MODE);
-          debug(sql);
-          debug(json);
+          var sql = tosql(ast, json, DEV_MODE, process.env.CONNECT_FROM_HOST);
+          debug('sql', sql);
+          debug('json data:', json);
+          debug('options:', options);
 
           if (buffer.length !== contentLength) info('WARNING: data received less that indicated content length');
 

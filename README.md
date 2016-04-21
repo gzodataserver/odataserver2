@@ -9,6 +9,9 @@ Pre-requisites
 
 NodeJS and a MySQL (or MariaDB) needs to be installed.
 
+NOTE: I'm using MariaDb 10.1.13. I've seen problems with older mysql versions. There seams
+to have occured changes in how the password is set in newer versions of MariaDB/MySQL.
+
 
 Getting started
 --------------
