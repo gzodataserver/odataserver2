@@ -9,9 +9,6 @@ Pre-requisites
 
 NodeJS and a MySQL (or MariaDB) needs to be installed.
 
-NOTE: I'm using MariaDb 10.1.13. I've seen problems with older mysql versions. There seams
-to have occured changes in how the password is set in newer versions of MariaDB/MySQL.
-
 
 Getting started
 --------------
@@ -67,3 +64,7 @@ Solutions to some problems:
 
  * Q: `[Error: `value` required in setHeader("password", value).]`
  * A: Make sure that setenv is correct and used: `source setenv`
+
+ * Q: I get an assert error in the mysql unit test: `ERROR { [AssertionError: POST delete_table]`
+ * A: The reason is that the `warningCount` is 1 instead of 0 on some installations. Any problems
+      due to this has not been observed.

@@ -342,7 +342,7 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
       "affectedRows": 0,
       "insertId": 0,
       "serverStatus": 2,
-      "warningCount": 1,
+      "warningCount": 0,
       "message": "",
       "protocol41": true,
       "changedRows": 0
