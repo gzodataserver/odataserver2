@@ -6,6 +6,7 @@ var ODServerMysql = require('./odservermysql.js');
 var ODServerLevelDb = require('./odserverleveldb.js');
 var OdParser = require('odparser').OdParser;
 var OdAcl = require('odacl');
+var basicAuth = require('connectbasicauth');
 
 // constants
 // =========
@@ -93,6 +94,8 @@ mws.use(function (req, res, next) {
 
   next();
 });
+
+mws.use(basicAuth);
 
 mws.use(odsMysql.handleRequest());
 
