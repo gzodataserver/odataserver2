@@ -47,6 +47,12 @@ stderr_logfile=syslog
 autorestart=true
 ```
 
+Basic HTTP authentication
+-------------------------
+
+It is now possible to authenticate users with basic HTTP authentication
+and build a custom authentication model. See [connectbasicauth](https://github.com/gizur/connectbasicauth)
+for details on how this is done.
 
 ToDo
 ---
