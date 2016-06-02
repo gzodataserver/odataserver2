@@ -52,3 +52,19 @@ get service def.
 
 >curl -H "user: $ACCOUNTID" -H "password: $PASSWORD" $SERVER/0b213a639078/mytable/\$metadata
 
+
+stored procedures
+----------------
+
+Create this stored procedure in the datebase (connect from the command line or using phpmyadmin etc.);
+
+DELIMITER $$
+CREATE DEFINER=`jonas`@`%` PROCEDURE `spTest`(IN p1 VARCHAR(250), IN p2 INT)
+BEGIN
+  select p1, p2;
+END$$
+DELIMITER;
+
+Now run the stored procedure like this:
+
+>curl -H "user: $ACCOUNTID" -H "password: $PASSWORD"  $SERVER/$ACCOUNTID/s/exec -d '{"procedure":"spTest", "params": ["1",2]}'
