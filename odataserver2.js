@@ -100,7 +100,8 @@ mws.use(basicAuth);
 mws.use(odsMysql.handleRequest());
 
 var acl = new OdAcl('perms', {
-  host: process.env.DB_HOST
+  host: process.env.DB_HOST,
+  parseSlashes: true
 }, handleError);
 mws.use(acl.handleRequest());
 mws.use(odsLevelDb.handleRequest());
