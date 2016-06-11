@@ -82,13 +82,16 @@ Work with BLOBs
 ---------------
 
 Buckets are key/value stores for BLOBs. A `POST` operation writes and `GET`
-operation will read the result. Buckets value ara managed using versions. It is
+operation will read the result. Buckets value are managed using versions. It is
 always possible to see the full history of a key. There is not `DELETE`
 operation. Just write a empty value instead.
 
 Bucket names must begin with the prefix `b_`. This means that tables cannot
 begin with `b_`. Privileges for buckets are manages with the same API functions
 as tables.
+
+There is support for subfolders in buckets. Creating the bucket `b_mybucket`
+makes it possible to write to `b_mybucket/subfolder`.
 
 1. Create a new bucket:
 `curl -H "user:3ea8f06baf64" -H "password:xxx" -d '{"bucketName":"b_mybucket"}' http://[IP]:[PORT]/3ea8f06baf64/s/create_bucket`
