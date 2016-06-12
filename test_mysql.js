@@ -148,6 +148,22 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
       "col2": "22"
     }], 'GET mytable')
 
+    // CMD
+    var path = '/' + ACCOUNTID + '/s/cmd';
+    return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'),
+      {cmd: 'create view vwMyView as select * from mytable'});
+  })
+  .then(function (res) {
+    assertJSON(p, res, [ { queryType: 'cmd' },
+     { fieldCount: 0,
+       affectedRows: 0,
+       insertId: 0,
+       serverStatus: 2,
+       warningCount: 0,
+       message: '',
+       protocol41: true,
+       changedRows: 0 } ], 'POST s/cmd')
+
     // UPDATE
     var path = '/' + ACCOUNTID + '/mytable';
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'PUT'), {
@@ -329,33 +345,31 @@ remote.request(createOptions(ACCOUNTID, PASSWORD, '/create_account', 'POST'), {
     }], 'DELTE mytable');
 
     // DROP TABLE
-    var path = '/' + ACCOUNTID + SYS_PATH + '/delete_table';
+    var path = '/' + ACCOUNTID + SYS_PATH + '/delete_table?$debug=0';
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'POST'), {
       "tableName": "mytable"
     });
   })
   .then(function (res) {
-    assertJSON(p, res, [{
-      "queryType": "delete_table"
-    }, {
-      "fieldCount": 0,
-      "affectedRows": 0,
-      "insertId": 0,
-      "serverStatus": 2,
-      "warningCount": 0,
-      "message": "",
-      "protocol41": true,
-      "changedRows": 0
-    }], 'POST delete_table');
+    assertJSON(p, res, [ { queryType: 'delete_table' },
+     { fieldCount: 0,
+       affectedRows: 0,
+       insertId: 0,
+       serverStatus: 10,
+       warningCount: 0,
+       message: '',
+       protocol41: true,
+       changedRows: 0 },
+     { debug: 'select "delete_table" as queryType;drop table mytable;' } ],
+      'POST delete_table');
 
     // SERVICE DEF
     var path = '/' + ACCOUNTID;
     return remote.request(createOptions(ACCOUNTID, PASSWORD, path, 'GET'), null);
   })
   .then(function (res) {
-    assertJSON(p, res, [{
-      "queryType": "service_def"
-    }], 'GET / (service def)');
+    assertJSON(p, res, [ { queryType: 'service_def' },
+     { table_name: 'vwmyview', mb: null } ], 'GET / (service def)');
 
     // DELETE ACCOUNT
     var path = '/' + ACCOUNTID + SYS_PATH + '/delete_account';
