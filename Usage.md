@@ -91,7 +91,7 @@ begin with `b_`. Privileges for buckets are manages with the same API functions
 as tables.
 
 There is support for subfolders in buckets. Creating the bucket `b_mybucket`
-makes it possible to write to `b_mybucket/subfolder`.
+makes it possible to write to `b_mybucket$subfolder`.
 
 1. Create a new bucket:
 `curl -H "user:3ea8f06baf64" -H "password:xxx" -d '{"bucketName":"b_mybucket"}' http://[IP]:[PORT]/3ea8f06baf64/s/create_bucket`
