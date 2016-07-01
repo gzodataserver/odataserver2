@@ -79,7 +79,8 @@ var handleError = function (req, res, next, err) {
     err: err
   }));
   error(err);
-  next();
+  //next();
+  res.end();
 };
 
 mws.use(function (req, res, next) {
@@ -89,10 +90,10 @@ mws.use(function (req, res, next) {
   log('processing request: ', req.url, ' content length: ' + contentLength);
 
   if (!req.ast) handleError(req, res, next, 'Unknown operation: ' + req.url);
-
-  debug(req.ast);
-
-  next();
+  else {
+    debug(req.ast);
+    next();
+  }
 });
 
 mws.use(basicAuth);
