@@ -102,7 +102,8 @@ mws.use(odsMysql.handleRequest());
 
 var acl = new OdAcl('perms', {
   host: process.env.DB_HOST,
-  parseChar: '$'
+  parseChar: '$',
+  connectFromHost: (process.env.DB_HOST === 'localhost') ? 'localhost' : '%'
 }, handleError);
 mws.use(acl.handleRequest());
 mws.use(odsLevelDb.handleRequest());
