@@ -12,18 +12,19 @@ HELP: curl $SERVER/help
 NOTE: Just run echo if you need to debug a command
 
 
-Create an  account
--------------------
+Accounts
+--------
 
 >curl -d '{"email":"'$EMAIL'"}' $SERVER/create_account
 >ACCOUNTID=...
 
-
 >curl -d '{"accountId":"'$ACCOUNTID'","email":"'$EMAIL'"}' $SERVER/$ACCOUNTID/s/reset_password
 >PASSWORD=...
 
+>curl -X POST -H "user: $ACCOUNTID" -H "password: $PASSWORD" -d '{"accountId":"'$ACCOUNTID'","email":"'$EMAIL'"}' $SERVER/$ACCOUNTID/s/delete_account
 
-create a bucket 
+
+create a bucket
 ---------------
 
 >curl -H "user: $ACCOUNTID" -H "password: $PASSWORD" -d '{"name":"b_rootapp","accountId":"'$ACCOUNTID'","verbs":["select","insert","update","delete"]}' $SERVER/$ACCOUNTID/s/grant_bucket
@@ -58,12 +59,12 @@ stored procedures
 
 Create this stored procedure in the datebase (connect from the command line or using phpmyadmin etc.);
 
-DELIMITER $$
-CREATE DEFINER=`jonas`@`%` PROCEDURE `spTest`(IN p1 VARCHAR(250), IN p2 INT)
-BEGIN
-  select p1, p2;
-END$$
-DELIMITER;
+    DELIMITER $$
+    CREATE DEFINER=`jonas`@`%` PROCEDURE `spTest`(IN p1 VARCHAR(250), IN p2 INT)
+    BEGIN
+      select p1, p2;
+    END$$
+    DELIMITER;
 
 Now run the stored procedure like this:
 
