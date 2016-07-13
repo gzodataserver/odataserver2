@@ -131,7 +131,7 @@ Clean up
 1. Drop accounts
 `curl -X POST -H "user:3ea8f06baf64" -H "password:xxx" -d '{"accountId":"3ea8f06baf64","email":"joe@example.com"}' http://[IP]:[PORT]/3ea8f06baf64/s/delete_account`
 
-`curl -X POST -H "user:6adb637f9cf2" -H "password:xxx" -d '{"accountId":"3ea8f06baf64","email":"joe@example.com"}' http://[IP]:[PORT]/6adb637f9cf2/s/delete_account`
+`curl -X POST -H "user:6adb637f9cf2" -H "password:xxx" -d '{"accountId":"6adb637f9cf2","email":"joe@example.com"}' http://[IP]:[PORT]/6adb637f9cf2/s/delete_account`
 
 
 
