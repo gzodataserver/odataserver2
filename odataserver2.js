@@ -35,6 +35,31 @@ var mws = new ConnectLight();
 var odsMysql = new ODServerMysql();
 var odsLevelDb = new ODServerLevelDb(LEVELDB_PATH);
 
+// Allow CORS
+mws.use( function(req, res, next) {
+
+  if (req.headers['origin']) {
+    var origin = req.headers['origin'];
+    debug('CORS headers set. Allowing the clients origin: ' + origin);
+
+    res.setHeader('Access-Control-Allow-Origin', origin);
+
+    res.setHeader('Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept, ' +
+      'user, password');
+
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+  }
+
+  // The response to `OPTIONS` requests is always the same empty message
+  if (req.method == 'OPTIONS') {
+    res.end();
+  }
+
+  next();
+});
+
 mws.use('/help', function (req, res, next) {
   var path = require('path');
   var fs = require('fs');
