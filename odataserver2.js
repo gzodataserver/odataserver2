@@ -48,6 +48,7 @@ mws.use( function(req, res, next) {
       'Origin, X-Requested-With, Content-Type, Accept, ' +
       'user, password');
 
+    res.setHeader('Access-Control-Expose-Headers', 'ETag'); 
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
   }
